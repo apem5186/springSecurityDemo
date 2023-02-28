@@ -1,0 +1,11 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Info</title>
+</head>
+<body>
+<h1>Welcome, <span th:text="${#authentication.getName()}"></span></h1>
+<p>Your roles are: <span th:text="${#authentication.getAuthorities()}"></span></p>
+<p>Your email is: <span th:text="${email}"></span> </p>
+</body>
+</html>

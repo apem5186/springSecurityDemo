@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Registration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 50px;
+    }
+    form {
+      background-color: white;
+      width: 50%;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      padding: 5px;
+      margin-top: 5px;
+      width: 100%;
+      border-radius: 5px;
+      border: none;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button[type="submit"] {
+      margin-top: 10px;
+      padding: 5px 20px;
+      background-color: #008CBA;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<h1>Registration</h1>
+<form th:action="@{/signUp}" th:object="${signupDto}" method="post">
+  <div>
+    <label>Username:</label>
+    <input type="text" th:field="*{username}" required />
+  </div>
+  <div>
+    <label>Email:</label>
+    <input type="email" th:field="*{email}" required />
+  </div>
+  <div>
+    <label>Password:</label>
+    <input type="password" th:field="*{password1}" required />
+  </div>
+  <div>
+    <label>Confirm Password:</label>
+    <input type="password" th:field="*{password2}" required />
+  </div>
+  <div>
+    <button type="submit">Sign up</button>
+  </div>
+</form>
+</body>
+</html>
