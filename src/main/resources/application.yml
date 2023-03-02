@@ -25,3 +25,8 @@ spring:
     show-sql: true
     open-in-view: true
     database-platform: org.hibernate.dialect.H2Dialect
+
+app:
+  jwtSecret: 1a2b3c4d
+  jwtExpirationInMs: 3600
+  refreshExpirationInMs: 7200

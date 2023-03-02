@@ -1,6 +1,10 @@
 package com.example.springsecuritydemo.config;
 
+import com.example.springsecuritydemo.config.filter.JwtAuthenticationFilter;
+import com.example.springsecuritydemo.config.filter.JwtRefreshFilter;
 import com.example.springsecuritydemo.config.handler.CustomAuthenticationFailureHandler;
+import com.example.springsecuritydemo.service.jwt.TokenProvider;
+import com.example.springsecuritydemo.service.user.UserSecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -28,15 +33,20 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web -> web.ignoring().requestMatchers("/h2-console/**"));
     }
+    private final UserSecurityService userSecurityService;
 
+    private final TokenProvider tokenProvider;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http.authorizeHttpRequests()
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/signUp")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/h2-console")).permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, userSecurityService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtRefreshFilter(tokenProvider, userSecurityService), JwtAuthenticationFilter.class)
                 .csrf().ignoringRequestMatchers(
                         new AntPathRequestMatcher("/h2-console/**"))
                 .and()

@@ -23,4 +23,12 @@ public class UserSecurityService implements UserDetailsService {
         log.info("USER : " + user.getUsername() + " AND " + user.getPassword());
         return User.build(user);
     }
+
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+        log.info("USER ID : " + user.getId() + " AND " + user.getPassword());
+        return User.build(user);
+    }
+
 }
