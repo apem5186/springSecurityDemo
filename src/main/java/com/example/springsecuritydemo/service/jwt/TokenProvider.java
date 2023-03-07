@@ -9,16 +9,20 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TokenProvider {
 
     @Value("${app.jwtSecret}")
@@ -46,7 +50,7 @@ public class TokenProvider {
                 .setSubject(userPrincipal.getId().toString())
                 .setIssuedAt(new Date())
                 .setExpiration(accessExpiryDate)
-                .signWith(getKey(), SignatureAlgorithm.HS512)
+                .signWith(SignatureAlgorithm.HS512, getKey())
                 .compact();
 
         // Generate refresh token
@@ -55,7 +59,7 @@ public class TokenProvider {
                 .setSubject(userPrincipal.getId().toString())
                 .setIssuedAt(new Date())
                 .setExpiration(refreshExpiryDate)
-                .signWith(getKey(), SignatureAlgorithm.HS512)
+                .signWith(SignatureAlgorithm.HS512, getKey())
                 .compact();
 
         RefreshToken refreshTokenEntity = new RefreshToken();
@@ -89,5 +93,23 @@ public class TokenProvider {
             System.out.println("Invalid JWT token");
         }
         return false;
+    }
+
+    public long getRefreshTokenExpirationInMillis() {
+        return refreshExpirationInMs;
+    }
+
+    public long getAccessTokenExpirationInMillis() {
+        return jwtExpirationInMs;
+    }
+
+    public LocalDateTime getTokenExpiration(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Date expirationDate = claims.getExpiration();
+        return LocalDateTime.ofInstant(expirationDate.toInstant(), ZoneId.systemDefault());
     }
 }

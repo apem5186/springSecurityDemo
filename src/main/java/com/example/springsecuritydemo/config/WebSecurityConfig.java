@@ -3,6 +3,11 @@ package com.example.springsecuritydemo.config;
 import com.example.springsecuritydemo.config.filter.JwtAuthenticationFilter;
 import com.example.springsecuritydemo.config.filter.JwtRefreshFilter;
 import com.example.springsecuritydemo.config.handler.CustomAuthenticationFailureHandler;
+import com.example.springsecuritydemo.config.handler.CustomAuthenticationSuccessHandler;
+import com.example.springsecuritydemo.config.handler.CustomLogoutSuccessHandler;
+import com.example.springsecuritydemo.repository.RefreshTokenRepository;
+import com.example.springsecuritydemo.repository.UserRepository;
+import com.example.springsecuritydemo.service.jwt.AccessTokenResponse;
 import com.example.springsecuritydemo.service.jwt.TokenProvider;
 import com.example.springsecuritydemo.service.user.UserSecurityService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +19,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -35,7 +41,14 @@ public class WebSecurityConfig {
     }
     private final UserSecurityService userSecurityService;
 
-    private final TokenProvider tokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    private final UserRepository userRepository;
+
+    @Bean
+    public TokenProvider tokenProvider() {
+        return new TokenProvider(refreshTokenRepository);
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -43,10 +56,9 @@ public class WebSecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/signUp")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, userSecurityService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtRefreshFilter(tokenProvider, userSecurityService), JwtAuthenticationFilter.class)
                 .csrf().ignoringRequestMatchers(
                         new AntPathRequestMatcher("/h2-console/**"))
                 .and()
@@ -57,13 +69,19 @@ public class WebSecurityConfig {
                 .and()
                 .formLogin()
                 .loginPage("/login")
-                .defaultSuccessUrl("/")
+                .successHandler(new CustomAuthenticationSuccessHandler(tokenProvider()))
                 .failureHandler(new CustomAuthenticationFailureHandler())
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 .and()
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider(), userSecurityService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtRefreshFilter(tokenProvider(), userSecurityService), JwtAuthenticationFilter.class)
                 .logout()
+                .logoutUrl("/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID", "accessToken")
+                .logoutSuccessHandler(new CustomLogoutSuccessHandler(refreshTokenRepository, userRepository))
                 .and().build();
     }
 

@@ -2,21 +2,39 @@ package com.example.springsecuritydemo.controller;
 
 import com.example.springsecuritydemo.dto.SignUpDTO;
 import com.example.springsecuritydemo.entity.user.User;
+import com.example.springsecuritydemo.service.jwt.AccessTokenResponse;
+import com.example.springsecuritydemo.service.jwt.TokenProvider;
 import com.example.springsecuritydemo.service.user.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+
+    private final TokenProvider tokenProvider;
+
+    private final AuthenticationManager authenticationManager;
 
     @GetMapping("/login")
     public String login() {

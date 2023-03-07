@@ -3,34 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      margin: 0 auto;
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      background-color: #fff;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button[type="submit"] {
+      display: block;
+      margin: 0 auto;
+      padding: 5px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button[type="submit"]:hover {
+      background-color: #3e8e41;
+    }
+    .alert-danger {
+      color: #a94442;
+      background-color: #f2dede;
+      border: 1px solid #ebccd1;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+  <script>
+    function validateForm() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username === "" || password === "") {
+        alert("Username and password are required");
+        return false;
+      }
+    }
+  </script>
 </head>
 <body>
 <h1>Login</h1>
-<form th:action="@{/login}" method="post">
+<form th:action="@{/login}" method="post" onsubmit="return validateForm()">
   <div th:if="${param.error}">
     <div class="alert alert-danger">
-      <span th:if="${#strings.contains(param.error,'BadCredentialsException')}">
-        Invalid username or password.
-      </span>
+        <span th:if="${#strings.contains(param.error,'BadCredentialsException')}">
+          Invalid username or password.
+        </span>
       <span th:if="${#strings.contains(param.error,'DisabledException')}">
-        Your account has been disabled.
-      </span>
+          Your account has been disabled.
+        </span>
       <span th:if="${#strings.contains(param.error,'LockedException')}">
-        Your account has been locked.
-      </span>
+          Your account has been locked.
+        </span>
       <span th:if="${#strings.contains(param.error,'AccountExpiredException')}">
-        Your account has expired.
-      </span>
+          Your account has expired.
+        </span>
       <span th:if="${#strings.contains(param.error,'CredentialsExpiredException')}">
-        Your credentials have expired.
-      </span>
+          Your credentials have expired.
+        </span>
     </div>
   </div>
-  <div>
+  <div class="form-group">
     <label for="username">Username:</label>
     <input type="text" id="username" name="username" />
   </div>
-  <div>
+  <div class="form-group">
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" />
   </div>

@@ -1,11 +1,53 @@
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>User Info</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        form {
+            margin-top: 1em;
+        }
+
+        input[type=submit] {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
 <h1>Welcome, <span th:text="${#authentication.getName()}"></span></h1>
 <p>Your roles are: <span th:text="${#authentication.getAuthorities()}"></span></p>
 <p>Your email is: <span th:text="${email}"></span> </p>
+<p>Your Access Token Expiration : <span th:text="${accessTokenExpiration}"></span> </p>
+<p>Your refresh Token Expiration : <span th:text="${refreshTokenExpiration}"></span> </p>
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Logout"/>
+</form>
 </body>
 </html>
