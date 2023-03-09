@@ -4,9 +4,7 @@ import com.example.springsecuritydemo.entity.user.RefreshToken;
 import com.example.springsecuritydemo.entity.user.User;
 import com.example.springsecuritydemo.repository.RefreshTokenRepository;
 import com.sun.security.auth.UserPrincipal;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,13 +82,27 @@ public class TokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
+            Jws<Claims> claims = Jwts.parserBuilder()
                     .setSigningKey(getKey())
                     .build()
                     .parseClaimsJws(token);
+            Instant now = Instant.now();
+            Instant expiration = claims.getBody().getExpiration().toInstant();
+            if (expiration.isBefore(now)) {
+                System.out.println("JWT token has expired");
+                return false;
+            }
             return true;
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
+            System.out.println("JWT token has expired");
+        } catch (UnsupportedJwtException e) {
+            System.out.println("Unsupported JWT token");
+        } catch (MalformedJwtException e) {
             System.out.println("Invalid JWT token");
+        } catch (SignatureException e) {
+            System.out.println("Invalid JWT signature");
+        } catch (IllegalArgumentException e) {
+            System.out.println("JWT claims string is empty");
         }
         return false;
     }
