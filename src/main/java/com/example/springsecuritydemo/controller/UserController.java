@@ -1,5 +1,6 @@
 package com.example.springsecuritydemo.controller;
 
+import com.example.springsecuritydemo.config.handler.CustomLogoutSuccessHandler;
 import com.example.springsecuritydemo.dto.SignUpDTO;
 import com.example.springsecuritydemo.entity.user.RefreshToken;
 import com.example.springsecuritydemo.entity.user.User;
@@ -8,6 +9,7 @@ import com.example.springsecuritydemo.repository.UserRepository;
 import com.example.springsecuritydemo.service.jwt.AccessTokenResponse;
 import com.example.springsecuritydemo.service.jwt.TokenProvider;
 import com.example.springsecuritydemo.service.user.UserService;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,13 +50,29 @@ public class UserController {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @PostMapping("/reissue")
-    public String reissue(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    public String reissue(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException, ServletException {
         String accessToken = getAccessTokenFromCookie(request);
-        Long userId = tokenProvider.getUserIdFromToken(accessToken);
-        String refreshToken = refreshTokenRepository.findByUserId(userId).toString();
-        // TODO : alert 띄우고 logout 시킨 후 login 페이지로 이동하기
-        if (!tokenProvider.validateToken(refreshToken)) {
-
+        Long userId = null;
+        if (accessToken == null) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            userId = userRepository.findByUsername(username).orElseThrow().getId();
+        } else {
+            userId = tokenProvider.getUserIdFromToken(accessToken);
+        }
+        log.info("ACCESS TOKEN : " + accessToken);
+        log.info("USER ID : " + userId);
+        String refreshToken = refreshTokenRepository.findByUserId(userId).orElseThrow().getToken();
+        log.info("REFRESH TOKEN : " + refreshToken);
+        if (!tokenProvider.validateToken(accessToken)) {
+            if (!tokenProvider.validateToken(refreshToken)) {
+                model.addAttribute("reValidate", "refresh token이 만료되었습니다. 로그인 페이지로 이동합니다.");
+                log.info("reValidate message added to model: " + model.getAttribute("reValidate"));
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null) {
+                    refreshTokenRepository.deleteByUserId(userId);
+                    return "redirect:/login";
+                }
+            }
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));

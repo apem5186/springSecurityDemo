@@ -28,8 +28,8 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
         log.info("User logged out successfully.");
         Long userId = userRepository.findByUsername(authentication.getName()).orElseThrow().getId();
         log.info("USER ID : " + userId);
-        refreshTokenRepository.deleteByUserId(userId);
         redirectStrategy.sendRedirect(request, response, "/login");
+        refreshTokenRepository.deleteByUserId(userId);
         super.onLogoutSuccess(request, response, authentication);
     }
 }

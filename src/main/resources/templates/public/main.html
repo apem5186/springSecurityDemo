@@ -46,11 +46,24 @@
 <p>Your email is: <span th:text="${email}"></span> </p>
 <p>Your Access Token Expiration : <span th:text="${accessTokenExpiration}"></span> </p>
 <p>Your refresh Token Expiration : <span th:text="${refreshTokenExpiration}"></span> </p>
+<span th:if="${reValidate}">[[${reValidate}]]</span>
 <form th:action="@{/logout}" method="post">
     <input type="submit" value="Logout"/>
 </form>
 <form th:action="@{/reissue}" method="post">
-    <button type="submit">Reissue Tokens</button>
+    <button type="submit" onclick="checkReValidate()">Reissue Tokens</button>
 </form>
+<script th:inline="javascript">
+    function checkReValidate() {
+        /*<![CDATA[*/
+        const reValidate = '[[${reValidate}]]';
+        console.log([[${reValidate}]]);
+        if (reValidate) {
+            alert(reValidate);
+        }
+        /*]]>*/
+    }
+
+</script>
 </body>
 </html>
