@@ -66,25 +66,17 @@
   </script>
 </head>
 <body>
+<div th:if="${#authorization.expression('isAuthenticated()')}">
+  <script th:inline="javascript">
+      alert("You are logged in!");
+      window.location.href = "/";
+  </script>
+</div>
 <h1>Login</h1>
 <form th:action="@{/login}" method="post" onsubmit="return validateForm()">
   <div th:if="${param.error}">
     <div class="alert alert-danger">
-        <span th:if="${#strings.contains(param.error,'BadCredentialsException')}">
-          Invalid username or password.
-        </span>
-      <span th:if="${#strings.contains(param.error,'DisabledException')}">
-          Your account has been disabled.
-        </span>
-      <span th:if="${#strings.contains(param.error,'LockedException')}">
-          Your account has been locked.
-        </span>
-      <span th:if="${#strings.contains(param.error,'AccountExpiredException')}">
-          Your account has expired.
-        </span>
-      <span th:if="${#strings.contains(param.error,'CredentialsExpiredException')}">
-          Your credentials have expired.
-        </span>
+      <span th:text="${param.message}">Default error message</span>
     </div>
   </div>
   <div class="form-group">

@@ -2,6 +2,12 @@ logging:
   level:
     com.example.springsecuritydemo: DEBUG
 spring:
+  security:
+    filter:
+      order: -100 # Set a high order to ensure this filter runs last
+    persist:
+      # Disable SecurityContext persistence
+      security-context: false
   main:
     allow-bean-definition-overriding: true
   thymeleaf:

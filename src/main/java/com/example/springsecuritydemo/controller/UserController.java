@@ -101,6 +101,14 @@ public class UserController {
 
     }
 
+    private String checkLoggedInFromRefreshToken(String username) {
+
+        Long userId = userRepository.findByUsername(username).orElseThrow().getId();
+        if (refreshTokenRepository.findByUserId(userId).isPresent()) {
+
+        }
+        return null;
+    }
     private String getAccessTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {

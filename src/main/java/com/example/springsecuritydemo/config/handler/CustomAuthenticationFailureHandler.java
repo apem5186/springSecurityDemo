@@ -34,6 +34,9 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             errorMessage = "Your credentials have expired. Please login again.";
         }
 
+        log.debug("Authentication failed with exception: {}", exception.getMessage());
+        log.debug("Error message set to: {}", errorMessage);
+
         setDefaultFailureUrl("/login?error=true&message=" + errorMessage);
         log.info("Login Error : " + errorMessage);
 
