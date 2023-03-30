@@ -2,12 +2,13 @@ package com.example.springsecuritydemo.config;
 
 import com.example.springsecuritydemo.config.filter.JwtAuthenticationFilter;
 import com.example.springsecuritydemo.config.filter.JwtRefreshFilter;
+import com.example.springsecuritydemo.config.filter.LogoutPreProcessingFilter;
 import com.example.springsecuritydemo.config.handler.CustomAuthenticationFailureHandler;
 import com.example.springsecuritydemo.config.handler.CustomAuthenticationSuccessHandler;
+import com.example.springsecuritydemo.config.handler.CustomLogoutHandler;
 import com.example.springsecuritydemo.config.handler.CustomLogoutSuccessHandler;
 import com.example.springsecuritydemo.repository.RefreshTokenRepository;
 import com.example.springsecuritydemo.repository.UserRepository;
-import com.example.springsecuritydemo.service.jwt.AccessTokenResponse;
 import com.example.springsecuritydemo.service.jwt.TokenProvider;
 import com.example.springsecuritydemo.service.user.UserSecurityService;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +20,16 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.NullSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -40,7 +43,7 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web -> web.ignoring().requestMatchers("/h2-console/**"));
+        return (web -> web.ignoring().requestMatchers("/h2-console/**", "/favicon.ico"));
     }
     private final UserSecurityService userSecurityService;
 
@@ -52,9 +55,21 @@ public class WebSecurityConfig {
     public TokenProvider tokenProvider() {
         return new TokenProvider(refreshTokenRepository);
     }
+
+    @Bean
+    public CustomLogoutSuccessHandler customLogoutSuccessHandler() {
+        return new CustomLogoutSuccessHandler(refreshTokenRepository, userRepository);
+    }
+
+    @Bean
+    public CustomLogoutHandler customLogoutHandler() {
+        return new CustomLogoutHandler();
+    }
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
+        LogoutPreProcessingFilter logoutPreProcessingFilter = new LogoutPreProcessingFilter("/logout");
         return http
                 .addFilterAfter(new SecurityContextPersistenceFilter(new NullSecurityContextRepository()), HeaderWriterFilter.class)
                 .authorizeHttpRequests()
@@ -80,14 +95,20 @@ public class WebSecurityConfig {
                 .exceptionHandling()
                 .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
                 .and()
+                .addFilterBefore(new SecurityContextHolderFilter(new HttpSessionSecurityContextRepository()), LogoutFilter.class)
+                .addFilterBefore(logoutPreProcessingFilter, LogoutFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider(), userSecurityService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtRefreshFilter(tokenProvider(), userSecurityService), JwtAuthenticationFilter.class)
                 .logout()
                 .logoutUrl("/logout")
+                .logoutSuccessUrl("/login")
+                .addLogoutHandler(customLogoutHandler())
+                .addLogoutHandler(new SecurityContextLogoutHandler())
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID", "accessToken")
-                .logoutSuccessHandler(new CustomLogoutSuccessHandler(refreshTokenRepository, userRepository))
-                .and().build();
+                .logoutSuccessHandler(customLogoutSuccessHandler())
+                .and()
+                .build();
     }
 
     @Bean

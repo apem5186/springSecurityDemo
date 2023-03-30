@@ -48,6 +48,8 @@
 <p>Your refresh Token Expiration : <span th:text="${refreshTokenExpiration}"></span> </p>
 <span th:if="${reValidate}">[[${reValidate}]]</span>
 <form th:action="@{/logout}" method="post">
+    <!--현재 로그아웃이 안됨 Value값 수정을 통해 Authentication 객체를 전달하는 방법을 고려해야함
+     session, cookie 등 여러 방법을 썼으나 고치기 힘듦-->
     <input type="submit" value="Logout"/>
 </form>
 <form th:action="@{/reissue}" method="post">

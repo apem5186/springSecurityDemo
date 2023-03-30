@@ -21,15 +21,13 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
-    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("User logged out successfully.");
-        Long userId = userRepository.findByUsername(authentication.getName()).orElseThrow().getId();
-        log.info("USER ID : " + userId);
-        redirectStrategy.sendRedirect(request, response, "/login");
-        refreshTokenRepository.deleteByUserId(userId);
+//        Long userId = userRepository.findByUsername(authentication.getName()).orElseThrow().getId();
+//        log.info("USER ID : " + userId);
+//        refreshTokenRepository.deleteByUserId(userId);
         super.onLogoutSuccess(request, response, authentication);
     }
 }
