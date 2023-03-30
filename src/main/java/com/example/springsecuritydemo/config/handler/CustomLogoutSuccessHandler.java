@@ -25,9 +25,9 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("User logged out successfully.");
-//        Long userId = userRepository.findByUsername(authentication.getName()).orElseThrow().getId();
-//        log.info("USER ID : " + userId);
-//        refreshTokenRepository.deleteByUserId(userId);
+        Long userId = userRepository.findByUsername(authentication.getName()).orElseThrow().getId();
+        log.info("USER ID : " + userId);
+        refreshTokenRepository.deleteByUserId(userId);
         super.onLogoutSuccess(request, response, authentication);
     }
 }

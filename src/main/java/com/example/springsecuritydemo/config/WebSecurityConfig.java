@@ -71,7 +71,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         LogoutPreProcessingFilter logoutPreProcessingFilter = new LogoutPreProcessingFilter("/logout");
         return http
-                .addFilterAfter(new SecurityContextPersistenceFilter(new NullSecurityContextRepository()), HeaderWriterFilter.class)
+                .addFilterAfter(new SecurityContextPersistenceFilter(new HttpSessionSecurityContextRepository()), HeaderWriterFilter.class)
                 .authorizeHttpRequests()
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/signUp")).permitAll()
