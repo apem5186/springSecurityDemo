@@ -101,7 +101,6 @@ public class WebSecurityConfig {
                 .addFilterBefore(new JwtRefreshFilter(tokenProvider(), userSecurityService), JwtAuthenticationFilter.class)
                 .logout()
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
                 .addLogoutHandler(customLogoutHandler())
                 .addLogoutHandler(new SecurityContextLogoutHandler())
                 .invalidateHttpSession(true)

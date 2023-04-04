@@ -45,16 +45,61 @@
 <p>Your roles are: <span th:text="${#authentication.getAuthorities()}"></span></p>
 <p>Your email is: <span th:text="${email}"></span> </p>
 <p>Your Access Token Expiration : <span th:text="${accessTokenExpiration}"></span> </p>
-<p>Your refresh Token Expiration : <span th:text="${refreshTokenExpiration}"></span> </p>
+<p>Your refresh Token Expiration : <span id="reTokenExpiration" th:text="${refreshTokenExpiration}"></span> </p>
 <span th:if="${reValidate}">[[${reValidate}]]</span>
-<form th:action="@{/logout}" method="post">
-    <!--현재 로그아웃이 안됨 Value값 수정을 통해 Authentication 객체를 전달하는 방법을 고려해야함
-     session, cookie 등 여러 방법을 썼으나 고치기 힘듦-->
+<span id="timeDiff">timeDiff</span>
+<form id="logout" th:action="@{/logout}" method="post">
     <input type="submit" value="Logout"/>
 </form>
 <form th:action="@{/reissue}" method="post">
     <button type="submit" onclick="checkReValidate()">Reissue Tokens</button>
 <script th:inline="javascript">
+
+    const reTime = document.getElementById("reTokenExpiration").textContent;
+    const date = new Date(reTime);
+    const leftTime = document.getElementById("timeDiff");
+    let timeDiff = null;
+    let timeInterval = null;
+
+    function updateTime() {
+        const now = new Date();
+        timeDiff = date.getTime() - now.getTime();
+        console.log(timeDiff)
+        if (timeDiff > 0) {
+            const totalSeconds = Math.floor(timeDiff / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const myParagraph = document.createElement("p");
+            myParagraph.textContent = "Time left until refresh token expires : " + formattedTime;
+
+            // Remove any existing child elements before appending the new one
+            while (leftTime.firstChild) {
+                leftTime.removeChild(leftTime.firstChild);
+            }
+
+            leftTime.appendChild(myParagraph);
+        } else {
+            alert("The refresh token has expired. You will be redirected to the login page.")
+            // Create a hidden form element with the logout action and method
+            const logoutForm = document.getElementById("logout");
+            logoutForm.submit();
+            clearInterval(timeInterval);
+        }
+    }
+    // Call updateTime() immediately to set the initial display
+    updateTime();
+
+    if (timeDiff > 0) {
+
+        // Call updateTime() every second using setInterval()
+        timeInterval = setInterval(updateTime, 1000);
+    }
+
+
+
+
     function checkReValidate() {
         /*<![CDATA[*/
         const reValidate = '[[${reValidate}]]';

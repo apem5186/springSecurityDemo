@@ -36,5 +36,5 @@ spring:
 
 app:
   jwtSecret: 1a2b3c4dH(@$HG*)JGKL:LG:J_+G$@}O{{WOB|@$_(B@|\\b@$|jH()@$H)HONGJN"G$@"FJI;:0fJ:G@$JIjg90hHG*)@$H)GIFMVNBH$H@)G@$G)F)N@OK$GMIHG*)H@$*)G)*WDNVWDNOVL!N)G$@)*GH
-  jwtExpirationInMs: 30000
-  refreshExpirationInMs: 60000
+  jwtExpirationInMs: 5000
+  refreshExpirationInMs: 10000

@@ -28,8 +28,8 @@ public class LogoutPreProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        logger.info("Requested URL: " + request.getRequestURI());
         if (logoutRequestMatcher.matches(request)) {
+            logger.info("Requested URL: " + request.getRequestURI());
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null) {
                 logger.info("LOGOUT PRE AUTHENTICATION : " + authentication.getPrincipal());
@@ -39,9 +39,11 @@ public class LogoutPreProcessingFilter extends OncePerRequestFilter {
             } else {
                 logger.info("AUTHENTICATION IS NULL");
             }
+            filterChain.doFilter(request, response);
+        } else {
+            filterChain.doFilter(request, response);
         }
 
-        filterChain.doFilter(request, response);
     }
 
 }

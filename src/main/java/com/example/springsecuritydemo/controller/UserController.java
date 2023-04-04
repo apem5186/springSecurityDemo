@@ -70,8 +70,8 @@ public class UserController {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null) {
                     refreshTokenRepository.deleteByUserId(userId);
-                    return "redirect:/login";
                 }
+                    return "redirect:/login";
             }
         }
 
