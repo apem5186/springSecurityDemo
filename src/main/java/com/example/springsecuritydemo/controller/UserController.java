@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Controller
@@ -99,6 +100,21 @@ public class UserController {
     public String signUp(@Valid SignUpDTO signUpDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "public/signUp";
+        }
+
+        if (signUpDTO.getUsername().equals("admin") && signUpDTO.getEmail().equals("admin@admin.com")) {
+            try {
+                userService.adminSignUp(signUpDTO.getUsername(), signUpDTO.getEmail(), signUpDTO.getPassword1());
+                return "redirect:/login";
+            } catch (DataIntegrityViolationException e) {
+                e.printStackTrace();
+                bindingResult.reject("signupFailed", "이미 등록된 사용자입니다.");
+                return "public/signUp";
+            } catch (Exception e) {
+                e.printStackTrace();
+                bindingResult.reject("signupFailed", e.getMessage());
+                return "public/signUp";
+            }
         }
 
         if (!signUpDTO.getPassword1().equals(signUpDTO.getPassword2())) {

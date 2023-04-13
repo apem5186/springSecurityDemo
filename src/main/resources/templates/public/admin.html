@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    /* Add your own CSS here */
+  </style>
+</head>
+<body>
+<h1>Admin Dashboard</h1>
+<p>Welcome, <span th:text="${#authentication.getName()}"></span></p>
+<p>Your roles are: <span th:text="${#authentication.getAuthorities()}"></span></p>
+
+<h2>Member List</h2>
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Status</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <!-- Add table rows with member data using a loop -->
+  <tr th:each="member : ${members}">
+    <td th:text="${member.id}"></td>
+    <td th:text="${member.name}"></td>
+    <td th:text="${member.email}"></td>
+    <td th:text="${member.status}"></td>
+    <td>
+      <button th:onclick="'editMember(' + ${member.id} + ')'">Edit</button>
+      <button th:onclick="'deleteMember(' + ${member.id} + ')'">Delete</button>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<h2>Currently Connected Members</h2>
+<ul>
+  <!-- Add list items with connected member data using a loop -->
+  <li th:each="connectedMember : ${connectedMembers}" th:text="${connectedMember.name}"></li>
+</ul>
+
+<form id="logout" th:action="@{/logout}" method="post">
+  <input type="submit" value="Logout"/>
+</form>
+
+<script>
+  // Add your JavaScript code for handling editMember and deleteMember actions
+</script>
+</body>
+</html>

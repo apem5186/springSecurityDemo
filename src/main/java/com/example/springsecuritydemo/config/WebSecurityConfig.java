@@ -73,6 +73,7 @@ public class WebSecurityConfig {
         return http
                 .addFilterAfter(new SecurityContextPersistenceFilter(new HttpSessionSecurityContextRepository()), HeaderWriterFilter.class)
                 .authorizeHttpRequests()
+                .requestMatchers(new AntPathRequestMatcher("/admin")).hasRole("ADMIN")
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/signUp")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console")).permitAll()

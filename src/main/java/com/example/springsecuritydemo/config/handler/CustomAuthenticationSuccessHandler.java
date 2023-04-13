@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -45,7 +46,20 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-        redirectStrategy.sendRedirect(request, response, "/");
+
+        // TODO : Admin으로 회원가입은 되나 authentication.getAuthorities()에 "ROLE_USER"라 뜸
+        if (AuthorityUtils.authorityListToSet(authentication.getAuthorities()).contains("ADMIN")) {
+            log.info("================================");
+            log.info("USER : " + authentication.getPrincipal());
+            log.info("USER info : " + authentication.getAuthorities());
+            log.info("ADMIN USER");
+            log.info("================================");
+            redirectStrategy.sendRedirect(request, response, "/admin");
+        } else {
+            log.info("USER : " + authentication.getPrincipal());
+            log.info("USER info : " + authentication.getAuthorities());
+            redirectStrategy.sendRedirect(request, response, "/");
+        }
     }
 
 }
