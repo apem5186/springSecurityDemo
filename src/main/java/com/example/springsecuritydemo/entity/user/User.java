@@ -37,13 +37,23 @@ public class User extends BaseEntity implements UserDetails{
     @Column(nullable = false)
     private UserRole userRole;
 
+    @Column
+    private boolean isLogin = false;
+
+    public void modify(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
     public User(Long id, String username, String password, String email,
-                UserRole userRole) {
+                UserRole userRole, boolean isLogin) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
         this.userRole = userRole;
+        this.isLogin = isLogin;
     }
 
     public static User build(User user) {
@@ -56,13 +66,18 @@ public class User extends BaseEntity implements UserDetails{
                 user.getUsername(),
                 user.getPassword(),
                 user.getEmail(),
-                user.getUserRole()
+                user.getUserRole(),
+                user.isLogin
         );
+    }
+
+    public boolean isLogin() {
+        return isLogin;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority(UserRole.USER.getValue()));
+        return Collections.singleton(new SimpleGrantedAuthority(getUserRole().getValue()));
     }
 
     @Override

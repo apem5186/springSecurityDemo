@@ -1,5 +1,6 @@
 package com.example.springsecuritydemo.config.handler;
 
+import com.example.springsecuritydemo.entity.user.User;
 import com.example.springsecuritydemo.repository.RefreshTokenRepository;
 import com.example.springsecuritydemo.repository.UserRepository;
 import jakarta.servlet.ServletException;
@@ -25,9 +26,11 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("User logged out successfully.");
-        Long userId = userRepository.findByUsername(authentication.getName()).orElseThrow().getId();
-        log.info("USER ID : " + userId);
-        refreshTokenRepository.deleteByUserId(userId);
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        user.setLogin(false);
+        userRepository.save(user);
+        log.info("USER ID : " + user.getId());
+        refreshTokenRepository.deleteByUserId(user.getId());
         response.sendRedirect("/login");
         super.onLogoutSuccess(request, response, authentication);
     }

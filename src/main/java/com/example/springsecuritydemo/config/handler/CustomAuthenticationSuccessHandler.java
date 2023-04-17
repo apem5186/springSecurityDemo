@@ -1,5 +1,7 @@
 package com.example.springsecuritydemo.config.handler;
 
+import com.example.springsecuritydemo.entity.user.User;
+import com.example.springsecuritydemo.repository.UserRepository;
 import com.example.springsecuritydemo.service.jwt.AccessTokenResponse;
 import com.example.springsecuritydemo.service.jwt.TokenProvider;
 import jakarta.servlet.http.Cookie;
@@ -28,10 +30,15 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
+    private final UserRepository userRepository;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         AccessTokenResponse tokens = tokenProvider.generateToken(authentication);
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        user.setLogin(true);
+        userRepository.save(user);
         String accessToken = tokens.getAccessToken();
         String refreshToken = tokens.getRefreshToken();
 

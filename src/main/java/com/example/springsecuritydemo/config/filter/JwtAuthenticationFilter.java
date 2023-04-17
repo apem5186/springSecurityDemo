@@ -1,5 +1,7 @@
 package com.example.springsecuritydemo.config.filter;
 
+import com.example.springsecuritydemo.entity.user.User;
+import com.example.springsecuritydemo.repository.UserRepository;
 import com.example.springsecuritydemo.service.jwt.AccessTokenResponse;
 import com.example.springsecuritydemo.service.jwt.TokenProvider;
 import com.example.springsecuritydemo.service.user.UserSecurityService;
@@ -28,10 +30,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
     private final UserSecurityService userSecurityService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(TokenProvider tokenProvider, UserSecurityService userSecurityService) {
+    public JwtAuthenticationFilter(TokenProvider tokenProvider, UserSecurityService userSecurityService,
+                                   UserRepository userRepository) {
         this.tokenProvider = tokenProvider;
         this.userSecurityService = userSecurityService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -42,10 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 Long userId = tokenProvider.getUserIdFromToken(jwt);
                 UserDetails userDetails = userSecurityService.loadUserById(userId);
-
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("==================================");
+                log.info("JwtAuthenticationFilter Log");
+                log.info("user " + userSecurityService.loadUserById(userId).getAuthorities());
+                log.info("User's UserDetails is " + userDetails);
+                log.info("User's UserDetails is " + userDetails.getAuthorities());
+                log.info("User's Authentication is " + authentication);
+                log.info("User's Authority is " + authentication.getAuthorities());
+                log.info("==================================");
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
