@@ -66,12 +66,12 @@
   </script>
 </head>
 <body>
-<div th:if="${#authorization.expression('isAuthenticated()')}">
-  <script th:inline="javascript">
-      alert("You are logged in!");
-      window.location.href = "/";
-  </script>
-</div>
+<!--<div th:if="${#authorization.expression('isAuthenticated()')}">-->
+<!--  <script th:inline="javascript">-->
+<!--      alert("You are logged in!");-->
+<!--      window.location.href = "/";-->
+<!--  </script>-->
+<!--</div>-->
 <h1>Login</h1>
 <form th:action="@{/login}" method="post" onsubmit="return validateForm()">
   <div th:if="${param.error}">

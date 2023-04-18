@@ -18,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
@@ -48,19 +50,20 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/admin/deleteUser")
-    public void deleteUser(@Valid Long userId, Model model, BindingResult bindingResult) {
-        User user = userRepository.findById(userId).orElseThrow();
+    @GetMapping("/admin/deleteUser/{id}")
+    public String deleteUser(@PathVariable("id") String id, @ModelAttribute("member") User member, BindingResult bindingResult) {
+        User user = userRepository.findById(Long.valueOf(id)).orElseThrow();
         try {
-            userService.deleteUser(userId);
+            userService.deleteUser(Long.valueOf(id));
         } catch (Exception e) {
             bindingResult.reject("deleteUserFailed", e.getMessage());
         }
+        return "redirect:/admin";
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/admin/modifyUser")
-    public void modifyUser(@Valid UserModifyDTO userModifyDTO, Model model, BindingResult bindingResult) {
+    public void modifyUser(@Valid UserModifyDTO userModifyDTO, BindingResult bindingResult) {
         try {
             userService.modifyUser(userModifyDTO.getUserId(), userModifyDTO.getUsername(), userModifyDTO.getPassword(),
                     userModifyDTO.getEmail());

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <title>Admin Dashboard</title>
@@ -43,8 +43,7 @@
     <td th:text="${member.email}"></td>
     <td th:text="${member.userRole}"></td>
     <td>
-      <button th:onclick="'editMember(' + ${member.id} + ')'">Edit</button>
-      <button th:onclick="'deleteMember(' + ${member.id} + ')'">Delete</button>
+      <button class="delete_button" th:data-uri="@{|/admin/deleteUser/${member.id}|}">Delete</button>
     </td>
   </tr>
   </tbody>
@@ -62,6 +61,14 @@
 
 <script>
   // Add your JavaScript code for handling editMember and deleteMember actions
+  const deleteButtons = document.querySelectorAll('.delete_button');
+  deleteButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      if (confirm('정말로 삭제하시겠습니까?')) {
+        location.href = this.dataset.uri;
+      }
+    });
+  });
 </script>
 </body>
 </html>
